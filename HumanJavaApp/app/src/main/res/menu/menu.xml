@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_spinner"
+        android:background="#ff00"
+        android:title="Select Module"
+        myapp:actionViewClass="android.widget.Spinner"
+        myapp:showAsAction="always"></item>
+</menu>
