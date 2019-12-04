@@ -232,6 +232,13 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     // API callbacks defined in HumanBodyInterface
     //
     /**
+     * API Callback - module load initialized
+     */
+    override fun onModuleInit() {
+        println("module init")
+    }
+
+    /**
      * API Callback - module load complete
      */
     override fun onModuleLoaded() {

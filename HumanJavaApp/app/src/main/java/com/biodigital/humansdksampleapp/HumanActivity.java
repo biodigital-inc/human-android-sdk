@@ -305,6 +305,13 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
     // API callbacks defined in HumanBodyInterface
     //
     /**
+     * API Callback - module initialized
+     */
+    public void onModuleInit() {
+        System.out.println("module init");
+    }
+
+    /**
      * API Callback - module load complete
      */
     public void onModuleLoaded() {

@@ -6,9 +6,8 @@ buildscript {
         google()
         jcenter()
         maven {
-            url 'https://biodigital.bintray.com/human-android-sdk/'
+            url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'        }
         }
-    }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.1'
         
@@ -23,7 +22,7 @@ allprojects {
         google()
         jcenter()
         maven {
-            url 'https://biodigital.bintray.com/human-android-sdk/'
+            url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'
         }
     }
 }

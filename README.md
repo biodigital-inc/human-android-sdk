@@ -13,7 +13,7 @@ To install human-android-sdk into your own app, just add the following to your t
     repositories {
     	...
         maven {
-            url 'https://biodigital.bintray.com/human-android-sdk/'
+            url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'
         }
     }
 
@@ -21,7 +21,7 @@ And then add the following dependency to your module's build.gradle file:
 
     dependencies {
 		...
-    	implementation 'com.biodigital:human-android-sdk:1.2.0'
+    	implementation 'com.biodigital:human-android-sdk:1.2.1'
 	}
 
 
