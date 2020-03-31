@@ -1,11 +1,14 @@
 package com.biodigital.humansdksampleapp;
 
 import android.animation.LayoutTransition;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,8 +20,15 @@ import android.widget.ScrollView;
 
 import com.biodigital.humansdk.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static android.icu.lang.UProperty.MATH;
 
 public class HumanActivity extends AppCompatActivity implements HKHumanInterface {
 
@@ -33,8 +43,6 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
     boolean expanded = false;
     HKColor paintColor = null;
 
-    boolean nativeUI = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,15 +50,13 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
 
         body = findViewById(R.id.humanbody);
         body.setInterface(this);
+        HashMap<HumanUIOptions,Boolean> uimap = new HashMap<>();
+        uimap.put(HumanUIOptions.animation,false);
+        body.setUIoptions(uimap);
 
-        if (nativeUI) {
-            HashMap<HumanUIOptions, Boolean> uimap = new HashMap<>();
-            uimap.put(HumanUIOptions.all, false);
-            body.setUIoptions(uimap);
-        }
-
-        String moduleID = getIntent().getStringExtra(MainActivity.MODULE_MESSAGE);
-        body.load(moduleID);
+        String modelID = getIntent().getStringExtra(MainActivity.MODEL_MESSAGE);
+        body.load(modelID);
+        body.annotations.hide();
 
         final Button homebutton = (Button)findViewById(R.id.homebutton);
         final Button resetbutton = (Button)findViewById(R.id.resetbutton);
@@ -70,16 +76,16 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
         final ScrollView scroller = (ScrollView)findViewById(R.id.scrollView);
         chapterPager = (ViewPager)findViewById(R.id.humanChapterPager);
 
-        if (!nativeUI) {
-            resetbutton.setVisibility(View.INVISIBLE);
-            dissectbutton.setVisibility(View.INVISIBLE);
-            xraybutton.setVisibility(View.INVISIBLE);
-            isolatebutton.setVisibility(View.INVISIBLE);
-            shareButton.setVisibility(View.INVISIBLE);
-            paintbutton.setVisibility(View.INVISIBLE);
-            scroller.setVisibility(View.INVISIBLE);
-            chapterPager.setVisibility(View.INVISIBLE);
-        }
+        homebutton.setVisibility(View.INVISIBLE);
+        resetbutton.setVisibility(View.INVISIBLE);
+        dissectbutton.setVisibility(View.INVISIBLE);
+        undobutton.setVisibility(View.INVISIBLE);
+        xraybutton.setVisibility(View.INVISIBLE);
+        isolatebutton.setVisibility(View.INVISIBLE);
+        shareButton.setVisibility(View.INVISIBLE);
+        allpaintstuff.setVisibility(View.INVISIBLE);
+        paintmenu.setVisibility(View.INVISIBLE);
+        chapterPager.setVisibility(View.INVISIBLE);
 
         final HKColor redColor = new HKColor();
         final HKColor greenColor = new HKColor();
@@ -97,7 +103,7 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
 
         resetbutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                body.scene.resetScene();
+                body.scene.reset();
                 xraymode = false;
                 isolatemode = false;
                 dissectmode = false;
@@ -244,7 +250,6 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
 
             }
         });
-
     }
 
     public void handleChapterClick() {
@@ -305,20 +310,13 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
     // API callbacks defined in HumanBodyInterface
     //
     /**
-     * API Callback - module initialized
+     * API Callback - model load complete
      */
-    public void onModuleInit() {
-        System.out.println("module init");
-    }
-
-    /**
-     * API Callback - module load complete
-     */
-    public void onModuleLoaded() {
-        System.out.println("MODULE LOADED CALLBACK");
+    public void onModelLoaded() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                body.ui.setBackgroundColor(Color.RED, Color.YELLOW);
                 ProgressBar progress = findViewById(R.id.progressBar1);
                 progress.setVisibility(View.GONE);
                 // build Chapter pager
@@ -333,6 +331,28 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
                 chapterPager.setAdapter(adapter);
             }
         });
+
+    }
+
+    Handler runHandler = new Handler(Looper.getMainLooper());
+    float t;
+
+    void camTest(float t) {
+        float factor = 0.2f * (float)Math.sin(t);
+        body.camera.zoom( factor );
+        t = t + 0.1f;
+        final float f = t;
+        Runnable go = new Runnable() {
+            public void run() {
+                camTest(f);
+            }
+        };
+        runHandler.postDelayed(go, 30);
+
+    }
+
+    public void onSceneInit(String title) {
+        System.out.println("got model title " + title);
     }
 
     /**
@@ -341,7 +361,7 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
      * @param objectID the internal ID of the object
      */
     public void onObjectSelected(String objectID) {
-        System.out.println("you picked " + body.scene.objects.get(objectID));
+        System.out.println("you selected " + body.scene.objects.get(objectID));
         View paintmenu = (View)findViewById(R.id.paintmenu);
         if (paintmenu.getVisibility() == View.VISIBLE) {
             if (paintColor == null) {
@@ -355,17 +375,64 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
     /**
      * API Callback - object deselected
      *
-     * @param objectID the internal ID of the object
+     * @param objectId the internal ID of the object
      */
-    public void onObjectDeselected(String objectID) {
+    public void onObjectDeselected(String objectId) {
+        System.out.println("object deselected " + objectId);
     }
 
-        /**
-         * API Callback - chapter transition to referenced chapter
-         *
-         * @param chapterID String ID of the Chapter, used to look up the Chapter object in
-         *                  HumanBody's public HashMap<String,Chapter> chapters
-         */
+    public void onObjectsShown(Map<String,Object> shown) {
+        for (String objectId : shown.keySet()) {
+            Boolean showMe = (Boolean)shown.get(objectId);
+//            System.out.println("object shown " + objectId + " = " + showMe);
+        }
+    }
+
+    public void onTimelineUpdated(HKTimeline timeline) {
+//        System.out.println("timeline update " + timeline.currentTime  + "/" + timeline.duration);
+    }
+
+    public void onSceneRestore() {
+        System.out.println("scene restored");
+    }
+
+    public void onXrayEnabled(Boolean isEnabled) {
+        System.out.println("xray enabled: " + isEnabled);
+    }
+
+    public void onAnnotationCreated(String annotationId) {
+//        System.out.println("annotation created " + annotationId);
+    }
+
+    public void onAnnotationDestroyed(String annotationId) {
+//        System.out.println("annotation destroyed " + annotationId);
+    }
+
+    public void onAnnotationsShown(Boolean shown) {
+//        System.out.println("annotations shown " + shown);
+    }
+
+    public void onAnnotationUpdated(HKAnnotation annotation) {
+//        System.out.println("annotation " + annotation.annotationId + " is at " + annotation.canvasPosition[0] + "," + annotation.canvasPosition[1]);
+    }
+
+    public void onObjectColor(String objectId, HKColor color) {
+        System.out.println("got color for " + objectId + " color " + color.tint.toString());
+    }
+
+    public void onSceneCapture(String captureString) {
+        System.out.println("** got scene captured message " + captureString);
+    }
+
+    public void onCameraUpdated(HKCamera camera) {
+//        System.out.println("got camera update callback pos " + camera.eye[0] + "," + camera.eye[1] + "," + camera.eye[2] + " look " + camera.look[0] + "," + camera.look[1] + "," + camera.look[2] + ", up " + camera.up[0] + "," + camera.up[1] + "," + camera.up[2] + ", zoom " + camera.zoomFactor);
+    }
+    /**
+     * API Callback - chapter transition to referenced chapter
+     *
+     * @param chapterID String ID of the Chapter, used to look up the Chapter object in
+     *                  HumanBody's public HashMap<String,Chapter> chapters
+     */
     public void onChapterTransition(String chapterID) {
         HKChapter chap = body.timeline.chapters.get(chapterID);
         System.out.println("got chapter " + chap.title);
@@ -384,6 +451,10 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
      *  API Callback - animation ended signal to reset animation UI
      */
     public void onAnimationComplete() {
+    }
+
+    public void onObjectPicked(String objectId, double[] position) {
+        System.out.println("pick callback " + objectId + " at position " + position[0] + "," + position[1] + "," + position[2] );
     }
 
 }

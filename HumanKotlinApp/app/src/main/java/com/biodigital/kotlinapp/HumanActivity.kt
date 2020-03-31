@@ -10,17 +10,13 @@ import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.RelativeLayout
-import android.widget.ScrollView
-
 import com.biodigital.humansdk.*
-import com.biodigital.kotlinapp.R
-
-import java.util.HashMap
-
 import kotlinx.android.synthetic.main.activity_human.*
-import kotlinx.android.synthetic.main.chapter_fragment.*
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.MutableMap
+import kotlin.collections.set
+import kotlin.collections.toTypedArray
 
 class HumanActivity : AppCompatActivity(), HKHumanInterface {
 
@@ -36,47 +32,45 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     internal var blueColor = HKColor()
     internal var yellowColor = HKColor()
 
-//    internal var chapterPager : ViewPager? = null
+    //    internal var chapterPager : ViewPager? = null
     internal var expanded = false
 
-    var nativeUI = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_human)
 
-        val moduleID = intent.getStringExtra(MODULE_MESSAGE)
-        System.out.println("load module " + moduleID)
+        val modelId = intent.getStringExtra(MODEL_MESSAGE)
+        System.out.println("load model " + modelId)
 
-
-        if (nativeUI) {
-            val uimap = HashMap<HumanUIOptions, Boolean>()
-            uimap[HumanUIOptions.all] = false
-            humanbody.setUIoptions(uimap)
-        }
+        val uimap = HashMap<HumanUIOptions, Boolean>()
+        uimap[HumanUIOptions.all] = false
+        humanbody.setUIoptions(uimap)
 
         humanbody.setInterface(this)
 
         progressBar1.setVisibility(View.VISIBLE)
 
         //        body.load("/production/maleAdult/flu.json");
-        humanbody.load(moduleID)
+        humanbody.load(modelId)
+
+        homebutton.visibility = View.INVISIBLE
+        resetbutton.visibility = View.INVISIBLE
+        dissectbutton.visibility = View.INVISIBLE
+        undobutton.visibility = View.INVISIBLE
+        xraybutton.visibility = View.INVISIBLE
+        isolatebutton.visibility = View.INVISIBLE
+        sharebutton.visibility = View.INVISIBLE
+        allpaintstuff.visibility = View.INVISIBLE
+        paintmenu.visibility = View.INVISIBLE
+        humanChapterPager.visibility = View.INVISIBLE
 
         homebutton.setOnClickListener { finish() }
 
-        if (!nativeUI) {
-            resetbutton.visibility = View.INVISIBLE
-            dissectbutton.visibility = View.INVISIBLE
-            xraybutton.visibility = View.INVISIBLE
-            isolatebutton.visibility = View.INVISIBLE
-            sharebutton.visibility = View.INVISIBLE
-            paintbutton.visibility = View.INVISIBLE
-            category.visibility = View.INVISIBLE
-        }
-
         resetbutton.setOnClickListener {
-            humanbody.scene.resetScene()
+            humanbody.scene.reset()
+            humanbody.camera.reset()
             xraymode = false
             isolatemode = false
             dissectmode = false
@@ -151,12 +145,12 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             }
         }
 
-        redColor.tint = floatArrayOf(1.0f,0.0f,0.0f)
-        greenColor.tint = floatArrayOf(0.0f,1.0f,0.0f)
-        greenColor.saturation = 0.5f;
-        blueColor.tint = floatArrayOf(0.0f,0.0f,1.0f)
-        blueColor.opacity = 0.66f;
-        yellowColor.tint = floatArrayOf(1.0f,1.0f,0.0f)
+        redColor.tint = doubleArrayOf(1.0,0.0,0.0)
+        greenColor.tint = doubleArrayOf(0.0,1.0,0.0)
+        greenColor.saturation = 0.5;
+        blueColor.tint = doubleArrayOf(0.0,0.0,1.0)
+        blueColor.opacity = 0.66;
+        yellowColor.tint = doubleArrayOf(1.0,1.0,0.0)
 
         redbutton.setOnClickListener {
             paintColor = redColor
@@ -232,17 +226,10 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     // API callbacks defined in HumanBodyInterface
     //
     /**
-     * API Callback - module load initialized
+     * API Callback - model load complete
      */
-    override fun onModuleInit() {
-        println("module init")
-    }
-
-    /**
-     * API Callback - module load complete
-     */
-    override fun onModuleLoaded() {
-        println("MODULE LOADED CALLBACK")
+    override fun onModelLoaded() {
+        println("MODEL LOADED CALLBACK")
         progressBar1.setVisibility(View.INVISIBLE)
         runOnUiThread {
             // build Chapter pager
@@ -253,11 +240,9 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
                     chaptersarray.add(chapter)
                 }
             }
-            if (nativeUI) {
-                val adapter = ChapterAdapter(supportFragmentManager)
-                adapter.setChapters(chaptersarray.toTypedArray())
-                humanChapterPager.adapter = adapter
-            }
+            val adapter = ChapterAdapter(supportFragmentManager)
+            adapter.setChapters(chaptersarray.toTypedArray())
+            humanChapterPager.adapter = adapter
         }
     }
 
@@ -266,29 +251,29 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      *
      * @param objectID the internal ID of the object
      */
-    override fun onObjectSelected(objectID: String) {
-        println("you picked " + humanbody.scene.objects[objectID]!!)
+    override fun onObjectSelected(objectId: String) {
+        println("you picked " + humanbody.scene.objects[objectId]!!)
         if (paintmenu.visibility == View.INVISIBLE) {
             return;
         }
         if (paintColor != null) {
-            humanbody.scene.colorObject(objectID, paintColor)
+            humanbody.scene.colorObject(objectId, paintColor)
         } else {
-            humanbody.scene.uncolorObject(objectID)
+            humanbody.scene.uncolorObject(objectId)
         }
     }
 
-    override fun onObjectDeselected(objectID: String) {
+    override fun onObjectDeselected(objectId: String) {
     }
 
-        /**
+    /**
      * API Callback - chapter transition to referenced chapter
      *
      * @param chapterID String ID of the Chapter, used to look up the Chapter object in
      * HumanBody's public HashMap<String></String>,Chapter> chapters
      */
-    override fun onChapterTransition(chapterID: String) {
-        val chap = humanbody.timeline.chapters[chapterID]
+    override fun onChapterTransition(objectId: String) {
+        val chap = humanbody.timeline.chapters[objectId]
         println("got chapter " + chap!!.title)
     }
 
@@ -306,4 +291,42 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      */
     override fun onAnimationComplete() {}
 
+    override fun onAnnotationCreated(p0: String?) {
+    }
+
+    override fun onAnnotationDestroyed(p0: String?) {
+    }
+
+    override fun onAnnotationUpdated(p0: HKAnnotation?) {
+    }
+
+    override fun onAnnotationsShown(p0: Boolean?) {
+    }
+
+    override fun onCameraUpdated(p0: HKCamera?) {
+    }
+
+    override fun onObjectColor(p0: String?, p1: HKColor?) {
+    }
+
+    override fun onObjectPicked(p0: String?, p1: DoubleArray?) {
+    }
+
+    override fun onObjectsShown(p0: MutableMap<String, Any>?) {
+    }
+
+    override fun onSceneCapture(p0: String?) {
+    }
+
+    override fun onSceneInit(p0: String?) {
+    }
+
+    override fun onSceneRestore() {
+    }
+
+    override fun onTimelineUpdated(p0: HKTimeline?) {
+    }
+
+    override fun onXrayEnabled(p0: Boolean?) {
+    }
 }
