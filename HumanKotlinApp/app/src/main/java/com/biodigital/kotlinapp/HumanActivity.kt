@@ -257,9 +257,9 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             return;
         }
         if (paintColor != null) {
-            humanbody.scene.colorObject(objectId, paintColor)
+            humanbody.scene.color(objectId, paintColor)
         } else {
-            humanbody.scene.uncolorObject(objectId)
+            humanbody.scene.uncolor(objectId)
         }
     }
 

@@ -365,9 +365,9 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
         View paintmenu = (View)findViewById(R.id.paintmenu);
         if (paintmenu.getVisibility() == View.VISIBLE) {
             if (paintColor == null) {
-                body.scene.uncolorObject(objectID);
+                body.scene.uncolor(objectID);
             } else {
-                body.scene.colorObject(objectID, paintColor);
+                body.scene.color(objectID, paintColor);
             }
         }
     }
