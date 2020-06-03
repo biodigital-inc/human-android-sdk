@@ -355,6 +355,10 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
         System.out.println("got model title " + title);
     }
 
+    public void onModelLoaded(String title) {
+
+    }
+
     /**
      * API Callback - object selected
      *

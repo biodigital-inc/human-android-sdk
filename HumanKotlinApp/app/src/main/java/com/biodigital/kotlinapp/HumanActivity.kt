@@ -228,8 +228,8 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     /**
      * API Callback - model load complete
      */
-    override fun onModelLoaded() {
-        println("MODEL LOADED CALLBACK")
+    override fun onModelLoaded(title: String) {
+        println("MODEL LOADED CALLBACK " + title)
         progressBar1.setVisibility(View.INVISIBLE)
         runOnUiThread {
             // build Chapter pager

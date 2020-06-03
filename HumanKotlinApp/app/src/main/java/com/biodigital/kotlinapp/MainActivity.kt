@@ -13,7 +13,6 @@ val MODEL_MESSAGE = "com.biodigital.com.MODEL_MESSAGE"
 
 class MainActivity : AppCompatActivity(), HKServicesInterface {
 
-    private var mind : HKServices? = null
     private var modelAdapter : ModelAdapter? = null
 
     var models : ArrayList<HKModel> = arrayListOf(HKModel("Head and Neck", "production/maleAdult/male_region_head_07",  "",  "human_02_regional_male_head_neck"),
@@ -26,13 +25,12 @@ class MainActivity : AppCompatActivity(), HKServicesInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mind = HKServices(this,"<YOUR KEY>", "<YOUR SECRET>")
-        mind!!.setInterface(this)
-        mind!!.getModels()
+        HKServices.getInstance().setup(this, this)
+        HKServices.getInstance().getModels()
         gridview.numColumns = 3
         gridview.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             val model = models[position]
-            if (mind!!.modelDownloaded(model.id)) {
+            if (HKServices.getInstance().modelDownloaded(model.id)) {
                 System.out.println("WE ALREADY DOWNLOADED THIS!");
             } else {
                 System.out.println("this isn't downloaded yet!");
@@ -64,9 +62,9 @@ class MainActivity : AppCompatActivity(), HKServicesInterface {
      */
     override fun onModelsLoaded() {
         this@MainActivity.runOnUiThread {
-            System.out.println("got  " + mind!!.models.size + " models")
-            if (mind!!.models.size > 0) {
-                models.addAll(mind!!.models)
+            System.out.println("got  " +  HKServices.getInstance().models.size + " models")
+            if (HKServices.getInstance().models.size > 0) {
+                models.addAll(HKServices.getInstance().models)
                 modelAdapter!!.notifyDataSetChanged()
             } else {
                 val builder : AlertDialog.Builder? = this.let {
@@ -81,6 +79,10 @@ class MainActivity : AppCompatActivity(), HKServicesInterface {
                 dialog!!.show()
             }
         }
+    }
+
+    override fun onModelDownloaded(p0: String?) {
+        System.out.println("model loaded")
     }
 
 }

@@ -19,8 +19,6 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements HKServicesInterface {
     public static final String MODEL_MESSAGE = "com.biodigital.com.MODEL_MESSAGE";
 
-    private HKServices mind;
-
     private ArrayList<HKModel> models = new ArrayList<>(Arrays.asList(new HKModel("Head and Neck", "production/maleAdult/male_region_head_07", "", "human_02_regional_male_head_neck"),
             new HKModel("Thorax", "production/maleAdult/male_region_thorax_07", "", "human_02_regional_male_thorax"),
             new HKModel("Ear: Coronal Cross Section", "production/maleAdult/ear_cross_section_coronal", "", "ear_cross_section_coronal"),
@@ -37,16 +35,15 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
 
         getSupportActionBar().setTitle("BioDigital SDK Content Library");
 
-        mind = new HKServices(this, "<YOUR KEY>", "<YOUR SECRET>");
-        mind.setInterface(this);
-        mind.getModels();
+        HKServices.getInstance().setup(this, this);
+        HKServices.getInstance().getModels();
         GridView gridView = (GridView) findViewById(R.id.gridview);
         gridView.setNumColumns(3);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 HKModel model = models.get(position);
-                if (mind.modelDownloaded(model.id)) {
+                if (HKServices.getInstance().modelDownloaded(model.id)) {
                     System.out.println("already downloaded");
                 } else {
                     System.out.println("not downloaded");
@@ -60,12 +57,16 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         gridView.setAdapter(modelAdapter);
     }
 
+    public void onModelDownloaded(String title) {
+
+    }
+
     public void onModelsLoaded() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mind.models != null && mind.models.size() > 0) {
-                    models.addAll(mind.models);
+                if (HKServices.getInstance().models != null && HKServices.getInstance().models.size() > 0) {
+                    models.addAll(HKServices.getInstance().models);
                     modelAdapter.notifyDataSetChanged();
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);

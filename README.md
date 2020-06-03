@@ -1,7 +1,7 @@
 # human-android-sdk
 The Biodigital Human Android SDK
 
-The current version is 2.0.0, released 31 March 2020
+The current version is 2.0.1, released 3 June 2020
 
 Please visit http://developer.biodigital.com for documentation and setup instructions, and http://human.biodigital.com to see the 3D Human
 
@@ -23,7 +23,7 @@ And then add the following dependency to your module's build.gradle file:
 
     dependencies {
 		...
-    	implementation 'biodigital-inc:human-android-sdk:2.0.0'
+    	implementation 'biodigital-inc:human-android-sdk:2.0.1'
     }
 
 
