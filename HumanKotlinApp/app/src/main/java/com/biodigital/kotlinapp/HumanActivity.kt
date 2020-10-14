@@ -6,10 +6,10 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.LightingColorFilter
 import android.os.Bundle
-import android.support.v4.view.ViewPager
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager.widget.ViewPager
 import com.biodigital.humansdk.*
 import kotlinx.android.synthetic.main.activity_human.*
 import java.util.*
@@ -40,6 +40,8 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_human)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true);
 
         val modelId = intent.getStringExtra(MODEL_MESSAGE)
         System.out.println("load model " + modelId)
@@ -200,6 +202,11 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             }
         })
 
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     fun handleChapterClick() {

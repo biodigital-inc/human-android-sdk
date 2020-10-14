@@ -76,7 +76,6 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
         final ScrollView scroller = (ScrollView)findViewById(R.id.scrollView);
         chapterPager = (ViewPager)findViewById(R.id.humanChapterPager);
 
-        homebutton.setVisibility(View.INVISIBLE);
         resetbutton.setVisibility(View.INVISIBLE);
         dissectbutton.setVisibility(View.INVISIBLE);
         undobutton.setVisibility(View.INVISIBLE);
@@ -97,6 +96,7 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
 
         homebutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                body.unload();
                 finish();
             }
         });
@@ -312,7 +312,7 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
     /**
      * API Callback - model load complete
      */
-    public void onModelLoaded() {
+    public void onModelLoaded(String loaded) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -353,10 +353,6 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
 
     public void onSceneInit(String title) {
         System.out.println("got model title " + title);
-    }
-
-    public void onModelLoaded(String title) {
-
     }
 
     /**

@@ -25,7 +25,7 @@ class ModelAdapter(val mContext : Context, var models:ArrayList<HKModel>) : Arra
         return models.get(position)
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var inflator = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val retView = inflator.inflate(R.layout.model_layout, null)
         val titleTextView : TextView = retView.findViewById(R.id.textview_model)

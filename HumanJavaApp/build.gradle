@@ -9,7 +9,7 @@ buildscript {
             url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'        }
         }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.0'
         
 
         // NOTE: Do not place your application dependencies here; they belong
