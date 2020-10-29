@@ -1,34 +1,24 @@
 package com.biodigital.humansdksampleapp;
 
 import android.animation.LayoutTransition;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
-import com.biodigital.humansdk.*;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.biodigital.humansdk.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import static android.icu.lang.UProperty.MATH;
 
 public class HumanActivity extends AppCompatActivity implements HKHumanInterface {
 
@@ -51,7 +41,7 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
         body = findViewById(R.id.humanbody);
         body.setInterface(this);
         HashMap<HumanUIOptions,Boolean> uimap = new HashMap<>();
-        uimap.put(HumanUIOptions.animation,false);
+        uimap.put(HumanUIOptions.all,true);
         body.setUIoptions(uimap);
 
         String modelID = getIntent().getStringExtra(MainActivity.MODEL_MESSAGE);
@@ -90,9 +80,6 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
         final HKColor greenColor = new HKColor();
         final HKColor blueColor = new HKColor();
         final HKColor yellowColor = new HKColor();
-
-        ProgressBar progress = findViewById(R.id.progressBar1);
-        progress.setVisibility(View.VISIBLE);
 
         homebutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -317,8 +304,6 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
             @Override
             public void run() {
                 body.ui.setBackgroundColor(Color.RED, Color.YELLOW);
-                ProgressBar progress = findViewById(R.id.progressBar1);
-                progress.setVisibility(View.GONE);
                 // build Chapter pager
                 HKChapter[] chaptersarray = new HKChapter[body.timeline.chapterList.size()];
                 int i = 0;

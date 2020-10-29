@@ -195,13 +195,5 @@
             </RelativeLayout>
         </RelativeLayout>
 
-        <ProgressBar
-                android:id="@+id/progressBar1"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerInParent="true"/>
-
     </com.biodigital.humansdk.HKHuman>
 </RelativeLayout>

@@ -47,12 +47,10 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         System.out.println("load model " + modelId)
 
         val uimap = HashMap<HumanUIOptions, Boolean>()
-        uimap[HumanUIOptions.all] = false
+        uimap[HumanUIOptions.all] = true
         humanbody.setUIoptions(uimap)
 
         humanbody.setInterface(this)
-
-        progressBar1.setVisibility(View.VISIBLE)
 
         //        body.load("/production/maleAdult/flu.json");
         humanbody.load(modelId)
@@ -237,7 +235,6 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      */
     override fun onModelLoaded(title: String) {
         println("MODEL LOADED CALLBACK " + title)
-        progressBar1.setVisibility(View.INVISIBLE)
         runOnUiThread {
             // build Chapter pager
             val chaptersarray = ArrayList<HKChapter>(humanbody.timeline.chapterList.size)
