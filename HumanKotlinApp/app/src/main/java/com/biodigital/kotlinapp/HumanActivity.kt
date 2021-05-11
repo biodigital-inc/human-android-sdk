@@ -250,6 +250,10 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         }
     }
 
+    override fun onModelLoadError(title: String) {
+        println("load error")
+    }
+
     /**
      * API Callback - object selected
      *

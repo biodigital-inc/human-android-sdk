@@ -319,6 +319,10 @@ public class HumanActivity extends AppCompatActivity implements HKHumanInterface
 
     }
 
+    public void onModelLoadError(String loaded) {
+        System.out.println("load failed for model " + loaded);
+    }
+
     Handler runHandler = new Handler(Looper.getMainLooper());
     float t;
 

@@ -32,7 +32,7 @@ dependencies {
     implementation 'androidx.viewpager:viewpager:1.0.0'
     testImplementation 'junit:junit:4.13'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'biodigital-inc:human-android-sdk:2.0.3'
+    implementation 'biodigital-inc:human-android-sdk:2.0.4'
     api 'org.nanohttpd:nanohttpd:2.3.1'
     api 'com.squareup.retrofit2:retrofit:2.3.0'
     api 'com.squareup.retrofit2:converter-gson:2.3.0'
