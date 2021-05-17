@@ -1,7 +1,10 @@
 # human-android-sdk
 The Biodigital Human Android SDK
 
-The current version is 2.0.3, released 28 October 2020
+The current version is 2.0.4, released 30 November 2020
+
+You can import the library aar file directly into your Android app and add the following line to your app's build.gradle file:<br>
+implementation project(':humansdk-2.0.4-release')
 
 NOTE: The SDK and Sample Apps have been updated to use the androidx libraries
 
@@ -11,22 +14,4 @@ To test the Sample Apps, download the ZIP and open HumanKotlinApp or HumanJava a
 NOTE: You'll need to generate an API key in our developer site and put your credentials into the Sample Apps to connect to our servers.
 
 <hr>
-
-To install human-android-sdk into your own app, just add the following to your top level build.gradle file:
-
-    repositories {
-    	...
-        maven {
-            url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'
-        }
-    }
-
-And then add the following dependency to your module's build.gradle file:
-
-    dependencies {
-		...
-    	implementation 'biodigital-inc:human-android-sdk:2.0.3'
-    }
-
-
 
