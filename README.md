@@ -7,7 +7,7 @@ Please visit http://developer.biodigital.com for documentation and setup instruc
 
 To test the Sample Apps, download the ZIP and open HumanKotlinApp or HumanJava app in Android Studio<br><br>
 
-NOTE: You'll need to generate an API key in our developer site and put your credentials into the Sample Apps to connect to our servers.
+NOTE: You'll need to generate an API key in our developer site and put your credentials and bundle ID into the Sample App to connect to our servers.
 
 <hr>
 
