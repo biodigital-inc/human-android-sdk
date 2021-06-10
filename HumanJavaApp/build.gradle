@@ -4,12 +4,10 @@ buildscript {
     
     repositories {
         google()
-        jcenter()
-        maven {
-            url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'        }
-        }
+        mavenCentral()
+    }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        classpath 'com.android.tools.build:gradle:4.2.1'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -20,9 +18,13 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
-            url 'https://dl.bintray.com/biodigital-inc/human-android-sdk/'
+            url = uri("https://maven.pkg.github.com/biodigital-inc/human-android-sdk")
+            credentials {
+                username = "public"
+                password = "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"
+            }
         }
     }
 }

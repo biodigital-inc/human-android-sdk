@@ -4,7 +4,7 @@
     <item
         android:id="@+id/menu_spinner"
         android:background="#ff00"
-        android:title="Select Module"
+        android:title="Select Model"
         myapp:actionViewClass="android.widget.Spinner"
         myapp:showAsAction="always"></item>
 </menu>

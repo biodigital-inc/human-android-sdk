@@ -4,15 +4,18 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.biodigital.humansdk.HKChapter;
 import com.biodigital.humansdk.HKChapter;
 
 public class ChapterAdapter extends FragmentStatePagerAdapter {
@@ -85,7 +88,7 @@ public class ChapterAdapter extends FragmentStatePagerAdapter {
             chapterTitleText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ((HumanActivity)getActivity()).handleChapterClick();
+                    ((MainActivity)getActivity()).handleChapterClick();
                 }
             });
             return rootView;
