@@ -31,5 +31,3 @@ And then add the following dependency to your module's build.gradle file:
 	implementation 'com.biodigital-inc:human-android-sdk:2.1.0'
     }
 
-
-
