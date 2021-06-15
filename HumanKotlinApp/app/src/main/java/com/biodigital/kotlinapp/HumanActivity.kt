@@ -25,6 +25,8 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     private var dissectmode = false
     private var paintmode = false
 
+    private var humanbody: HKHuman? = null
+
     internal var paintColor : HKColor? = null
 
     internal var redColor = HKColor()
@@ -48,12 +50,13 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
 
         val uimap = HashMap<HumanUIOptions, Boolean>()
         uimap[HumanUIOptions.all] = true
-        humanbody.setUIoptions(uimap)
 
-        humanbody.setInterface(this)
+        humanbody = HKHuman(humanview, uimap)
+
+        humanbody!!.setInterface(this)
 
         //        body.load("/production/maleAdult/flu.json");
-        humanbody.load(modelId)
+        humanbody!!.load(modelId)
 
         homebutton.visibility = View.INVISIBLE
         resetbutton.visibility = View.INVISIBLE
@@ -69,8 +72,8 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         homebutton.setOnClickListener { finish() }
 
         resetbutton.setOnClickListener {
-            humanbody.scene.reset()
-            humanbody.camera.reset()
+            humanbody!!.scene.reset()
+            humanbody!!.camera.reset()
             xraymode = false
             isolatemode = false
             dissectmode = false
@@ -85,7 +88,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
                 paintbutton.callOnClick();
             }
             dissectmode = !dissectmode
-            humanbody.scene.dissect(dissectmode)
+            humanbody!!.scene.dissect(dissectmode)
             dissectbutton.isSelected = dissectmode
             if (dissectmode) {
                 dissectbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
@@ -96,35 +99,35 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             }
         }
 
-        undobutton.setOnClickListener { humanbody.scene.undo() }
+        undobutton.setOnClickListener { humanbody!!.scene.undo() }
 
         xraybutton.setOnClickListener {
             xraymode = !xraymode
-            humanbody.scene.xray(xraymode)
+            humanbody!!.scene.xray(xraymode)
             if (xraymode) {
                 xraybutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
             } else {
                 xraybutton.background.colorFilter = null
             }
             if (dissectmode) {
-                humanbody.scene.dissect(true)
+                humanbody!!.scene.dissect(true)
             }
         }
 
         isolatebutton.setOnClickListener {
             isolatemode = !isolatemode
-            humanbody.scene.isolate(isolatemode)
+            humanbody!!.scene.isolate(isolatemode)
             //                if (isolatemode) {
             //                    isolatebutton.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF, 0xFFAA0000));
             //                } else {
             //                    isolatebutton.getBackground().setColorFilter(null);
             //                }
             if (dissectmode) {
-                humanbody.scene.dissect(true)
+                humanbody!!.scene.dissect(true)
             }
         }
 
-        sharebutton.setOnClickListener { humanbody.scene.share() }
+        sharebutton.setOnClickListener { humanbody!!.scene.share() }
 
         paintbutton.setOnClickListener {
             if (dissectmode) {
@@ -133,10 +136,10 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             paintmode = !paintmode
             if (paintmenu.visibility == View.VISIBLE) {
                 paintmenu.visibility = View.INVISIBLE
-                humanbody.scene.enableHighlight()
+                humanbody!!.scene.enableHighlight()
             } else {
                 paintmenu.visibility = View.VISIBLE
-                humanbody.scene.disableHighlight()
+                humanbody!!.scene.disableHighlight()
             }
             if (paintmode) {
                 paintbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
@@ -184,14 +187,14 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             }
 
             override fun onPageSelected(position: Int) {
-                if (position == humanbody.timeline.currentChapter.index) {
+                if (position == humanbody!!.timeline.currentChapter.index) {
                     println("already at chapter $position")
                     return
                 }
-                if (position > humanbody.timeline.currentChapter.index) {
-                    humanbody.timeline.nextChapter()
+                if (position > humanbody!!.timeline.currentChapter.index) {
+                    humanbody!!.timeline.nextChapter()
                 } else {
-                    humanbody.timeline.prevChapter()
+                    humanbody!!.timeline.prevChapter()
                 }
             }
 
@@ -237,9 +240,9 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         println("MODEL LOADED CALLBACK " + title)
         runOnUiThread {
             // build Chapter pager
-            val chaptersarray = ArrayList<HKChapter>(humanbody.timeline.chapterList.size)
-            for (chapterid in humanbody.timeline.chapterList) {
-                var chapter = humanbody.timeline.chapters[chapterid]
+            val chaptersarray = ArrayList<HKChapter>(humanbody!!.timeline.chapterList.size)
+            for (chapterid in humanbody!!.timeline.chapterList) {
+                var chapter = humanbody!!.timeline.chapters[chapterid]
                 if (chapter != null) {
                     chaptersarray.add(chapter)
                 }
@@ -260,14 +263,14 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      * @param objectID the internal ID of the object
      */
     override fun onObjectSelected(objectId: String) {
-        println("you picked " + humanbody.scene.objects[objectId]!!)
+        println("you picked " + humanbody!!.scene.objects[objectId]!!)
         if (paintmenu.visibility == View.INVISIBLE) {
             return;
         }
         if (paintColor != null) {
-            humanbody.scene.color(objectId, paintColor)
+            humanbody!!.scene.color(objectId, paintColor)
         } else {
-            humanbody.scene.uncolor(objectId)
+            humanbody!!.scene.uncolor(objectId)
         }
     }
 
@@ -281,7 +284,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      * HumanBody's public HashMap<String></String>,Chapter> chapters
      */
     override fun onChapterTransition(objectId: String) {
-        val chap = humanbody.timeline.chapters[objectId]
+        val chap = humanbody!!.timeline.chapters[objectId]
         println("got chapter " + chap!!.title)
     }
 

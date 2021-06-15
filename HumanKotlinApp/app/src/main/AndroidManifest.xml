@@ -21,8 +21,8 @@
         </activity>
         <activity android:name=".HumanActivity">
         </activity>
-        <meta-data android:value="95097501696d28102d5a8ec51e516e7bce1be0c6" android:name="com.biodigital.humansdk.API_KEY" />
-        <meta-data android:value="8221767b3c14403447597feeefc38bf1a0e772b1" android:name="com.biodigital.humansdk.API_SECRET" />
+        <meta-data android:value="" android:name="com.biodigital.humansdk.API_KEY" />
+        <meta-data android:value="" android:name="com.biodigital.humansdk.API_SECRET" />
     </application>
 
 </manifest>

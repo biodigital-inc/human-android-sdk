@@ -5,8 +5,8 @@
                 android:layout_height="match_parent"
                 tools:context="com.biodigital.kotlinapp.HumanActivity">
 
-    <com.biodigital.humansdk.HKHuman
-        android:id="@+id/humanbody"
+    <RelativeLayout
+        android:id="@+id/humanview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -195,5 +195,5 @@
             </RelativeLayout>
         </RelativeLayout>
 
-    </com.biodigital.humansdk.HKHuman>
+    </RelativeLayout>
 </RelativeLayout>
