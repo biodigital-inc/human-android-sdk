@@ -19,7 +19,7 @@ To install human-android-sdk into your own app, add our maven repository to your
             url = uri("https://maven.pkg.github.com/biodigital-inc/human-android-sdk")
             credentials {
                 username = "public"
-                password = "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"
+                password = "<-- insert our public key here -->"
             }
         }
     }
