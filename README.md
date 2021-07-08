@@ -28,6 +28,6 @@ And then add the following dependency to your module's build.gradle file:
 
     dependencies {
 		...
-		implementation 'com.biodigital-inc:human-android-sdk:2.1.0'
+		implementation 'com.biodigital-inc:human-android-sdk:2.1.1'
     }
 
