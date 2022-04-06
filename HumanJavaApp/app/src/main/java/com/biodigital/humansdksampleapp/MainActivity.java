@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
     HKColor paintColor = null;
 
     private ArrayList<HKModel> models = new ArrayList<>(Arrays.asList(
+            new HKModel("Title", "client/abbott/triclip_1", "", ""),
             new HKModel("Thorax", "production/maleAdult/human_02_regional_male_thorax.json", "", "human_02_regional_male_thorax"),
             new HKModel("Flu", "production/maleAdult/flu.json", "", "https://human.biodigital.com/thumbs/modules/production/maleAdult/flu/large/index.jpg"),
             new HKModel("Acne", "production/maleAdult/acne", "", "https://human.biodigital.com/thumbs/modules/production/maleAdult/acne/large/index.jpg"),
@@ -70,9 +71,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         getSupportActionBar().setTitle("BioDigital SDK Content Library");
 
         HKServices.getInstance().setup(this, this);
-//        HKServices.getInstance().validate(getApplicationContext(), "49a7a5f85eece6b9dc9610059908391bb2d61e22", "f6bd330fdd5996a03b37c40698ae66031d3f3d53");
-//        mind = new HKServices(this, "76a40ecac7a4cb54e720bf72562bd4b57f496b09", "6f08dc7320ff90c5c22265aa2c03dbbe7309692b", this);
-//        HKServices.getInstance().setLanguage(HKLanguage.FRENCH);
         HKServices.getInstance().getModels();
         GridView gridView = (GridView) findViewById(R.id.gridview);
         gridView.setNumColumns(3);
