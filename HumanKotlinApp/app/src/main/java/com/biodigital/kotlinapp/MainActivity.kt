@@ -7,7 +7,7 @@ import android.widget.AdapterView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.biodigital.humansdk.*
-import kotlinx.android.synthetic.main.activity_main.*
+import com.biodigital.kotlinapp.databinding.ActivityMainBinding
 
 val MODEL_MESSAGE = "com.biodigital.com.MODEL_MESSAGE"
 
@@ -15,32 +15,37 @@ class MainActivity : AppCompatActivity(), HKServicesInterface {
 
     private var modelAdapter : ModelAdapter? = null
 
-    var models : ArrayList<HKModel> = arrayListOf(HKModel("Head and Neck", "production/maleAdult/male_region_head_07",  "",  "human_02_regional_male_head_neck"),
+    var models : ArrayList<HKModel> = arrayListOf(
+        HKModel("Head and Neck", "production/maleAdult/male_region_head_07",  "",  "human_02_regional_male_head_neck"),
         HKModel("Thorax","production/maleAdult/male_region_thorax_07",  "", "human_02_regional_male_thorax"),
         HKModel("Ear: Coronal Cross Section", "production/maleAdult/ear_cross_section_coronal", "", "ear_cross_section_coronal"),
         HKModel("Atheriosclerosis: Total Occlusion", "production/maleAdult/atherosclerosis_total_occlusion", "", "atherosclerosis_total_occlusion"),
         HKModel("Hemorrhagic Stroke", "production/maleAdult/hemorrhagic_stroke", "", "hemorrhagic_stroke"),
         HKModel( "Breathing Dynamics", "production/maleAdult/breathing_dynamics","", "breathing_dynamics"))
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
         HKServices.getInstance().setup(this, this)
         HKServices.getInstance().getModels()
-        gridview.numColumns = 3
-        gridview.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+        binding.gridview.numColumns = 3
+        binding.gridview.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             val model = models[position]
             if (HKServices.getInstance().modelDownloaded(model.id)) {
-                System.out.println("WE ALREADY DOWNLOADED THIS!");
+                System.out.println("model already downloaded");
             } else {
-                System.out.println("this isn't downloaded yet!");
+                System.out.println("begin model download");
             }
             val intent = Intent(this@MainActivity, HumanActivity::class.java)
             intent.putExtra(MODEL_MESSAGE, model.id)
             startActivity(intent)
         }
         modelAdapter = ModelAdapter(this, models)
-        gridview.adapter = modelAdapter
+        binding.gridview.adapter = modelAdapter
     }
 
     /**
@@ -62,7 +67,7 @@ class MainActivity : AppCompatActivity(), HKServicesInterface {
      */
     override fun onModelsLoaded() {
         this@MainActivity.runOnUiThread {
-            System.out.println("got  " +  HKServices.getInstance().models.size + " models")
+            System.out.println("received  " +  HKServices.getInstance().models.size + " models")
             if (HKServices.getInstance().models.size > 0) {
                 models.addAll(HKServices.getInstance().models)
                 modelAdapter!!.notifyDataSetChanged()
@@ -81,8 +86,12 @@ class MainActivity : AppCompatActivity(), HKServicesInterface {
         }
     }
 
-    override fun onModelDownloaded(p0: String?) {
-        System.out.println("model loaded")
+    override fun onModelDownloaded(p0: String?, p1: Int, p2: Int) {
+        System.out.println("model download success")
+    }
+
+    override fun onModelDownloadError(p0: String?) {
+        System.out.println("model download error")
     }
 
 }
