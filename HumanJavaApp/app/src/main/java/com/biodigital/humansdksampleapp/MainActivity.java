@@ -33,6 +33,7 @@ import java.util.Arrays;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements HKServicesInterface, HKHumanInterface {
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
     private boolean xraymode = false;
     private boolean isolatemode = false;
     private boolean dissectmode = false;
+    private ArrayList<String> hiddenObjects = new ArrayList<>();
     private boolean paintmode = false;
 
     ViewPager chapterPager;
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
     HKColor paintColor = null;
 
     // set this to false to hide the built in UI and show native UI elements
-    boolean uiAll = true;
+    boolean uiAll = false;
 
     private ArrayList<HKModel> models = new ArrayList<>(Arrays.asList(
             new HKModel("Thorax", "production/maleAdult/human_02_regional_male_thorax.json", "", "human_02_regional_male_thorax"),
@@ -177,7 +179,10 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
 
         undobutton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                human.scene.undo();
+                if (hiddenObjects.size() > 0) {
+                    String objectID = hiddenObjects.remove(0);
+                    human.scene.show(new ArrayList<>(Arrays.asList(objectID)));
+                }
             }
         });
 
@@ -190,9 +195,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                 } else {
                     xraybutton.getBackground().setColorFilter(null);
                 }
-                if ( dissectmode ) {
-                    human.scene.dissect(true);
-                }
             }
         });
 
@@ -200,9 +202,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
             public void onClick(View v) {
                 isolatemode = !isolatemode;
                 human.scene.isolate(isolatemode);
-                if ( dissectmode ) {
-                    human.scene.dissect(true);
-                }
             }
         });
 
@@ -329,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         Button dissectbutton = (Button)findViewById(R.id.dissectbutton);
         Button undobutton = (Button)findViewById(R.id.undobutton);
         dissectmode = !dissectmode;
-        human.scene.dissect(dissectmode);
         dissectbutton.setSelected(dissectmode);
         if (dissectmode) {
             dissectbutton.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF, 0xFFAA0000));
@@ -492,8 +490,10 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
      */
     public void onObjectSelected(String objectID) {
         System.out.println("you selected " + human.scene.objects.get(objectID));
-        View paintmenu = (View)findViewById(R.id.paintmenu);
-        if (paintmenu.getVisibility() == View.VISIBLE) {
+        if (dissectmode) {
+            human.scene.hide(new ArrayList<>(Arrays.asList(objectID)));
+            hiddenObjects.add(0, objectID);
+        } else if (paintmode) {
             if (paintColor == null) {
                 human.scene.uncolor(objectID);
             } else {
