@@ -160,11 +160,15 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                 human.scene.reset();
                 xraymode = false;
                 isolatemode = false;
-                dissectmode = false;
                 xraybutton.getBackground().setColorFilter(null);
-                dissectbutton.getBackground().setColorFilter(null);
                 isolatebutton.getBackground().setColorFilter(null);
-                undobutton.setVisibility(View.INVISIBLE);
+                hiddenObjects.clear();
+                if (dissectmode) {
+                    doDissectButton();
+                }
+                if (paintmode) {
+                    doPaintButton();
+                }
             }
         });
 
@@ -195,6 +199,9 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                 } else {
                     xraybutton.getBackground().setColorFilter(null);
                 }
+                if (dissectmode) {
+                    doDissectButton();
+                }
             }
         });
 
@@ -202,6 +209,9 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
             public void onClick(View v) {
                 isolatemode = !isolatemode;
                 human.scene.isolate(isolatemode);
+                if (dissectmode) {
+                    doDissectButton();
+                }
             }
         });
 

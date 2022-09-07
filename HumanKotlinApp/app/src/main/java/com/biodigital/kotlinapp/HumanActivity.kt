@@ -1,6 +1,5 @@
 package com.biodigital.kotlinapp
 
-
 import android.animation.LayoutTransition
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -34,6 +33,8 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     internal var blueColor = HKColor()
     internal var yellowColor = HKColor()
 
+    internal var hiddenObjects = ArrayList<String>()
+
     internal var expanded = false
     private lateinit var binding: ActivityHumanBinding
 
@@ -43,7 +44,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         val view = binding.root
         setContentView(view)
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(true);
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val uiAll = false
 
@@ -88,21 +89,27 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
 
         binding.dissectbutton.setOnClickListener {
             if (paintmode) {
-                binding.paintbutton.callOnClick();
+                binding.paintbutton.callOnClick()
             }
             dissectmode = !dissectmode
-            humanbody!!.scene.dissect(dissectmode)
             binding.dissectbutton.isSelected = dissectmode
             if (dissectmode) {
                 binding.dissectbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
+                humanbody!!.scene.disableHighlight()
                 binding.undobutton.visibility = View.VISIBLE
             } else {
                 binding.dissectbutton.background.colorFilter = null
+                humanbody!!.scene.enableHighlight()
                 binding.undobutton.visibility = View.INVISIBLE
             }
         }
 
-        binding.undobutton.setOnClickListener { humanbody!!.scene.undo() }
+        binding.undobutton.setOnClickListener {
+            if (hiddenObjects.isNotEmpty()) {
+                var objectId = hiddenObjects.removeAt(0)
+                humanbody!!.scene.show(arrayListOf(objectId))
+            }
+        }
 
         binding.xraybutton.setOnClickListener {
             xraymode = !xraymode
@@ -113,20 +120,20 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
                 binding.xraybutton.background.colorFilter = null
             }
             if (dissectmode) {
-                humanbody!!.scene.dissect(true)
+                binding.dissectbutton.callOnClick()
             }
         }
 
         binding.isolatebutton.setOnClickListener {
             isolatemode = !isolatemode
             humanbody!!.scene.isolate(isolatemode)
-            //                if (isolatemode) {
-            //                    isolatebutton.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF, 0xFFAA0000));
-            //                } else {
-            //                    isolatebutton.getBackground().setColorFilter(null);
-            //                }
+            if (isolatemode) {
+                binding.isolatebutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
+            } else {
+                binding.isolatebutton.background.colorFilter = null
+            }
             if (dissectmode) {
-                humanbody!!.scene.dissect(true)
+                binding.dissectbutton.callOnClick()
             }
         }
 
@@ -134,7 +141,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
 
         binding.paintbutton.setOnClickListener {
             if (dissectmode) {
-                binding.dissectbutton.callOnClick();
+                binding.dissectbutton.callOnClick()
             }
             paintmode = !paintmode
             if (paintmode) {
@@ -150,9 +157,9 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
 
         redColor.tint = doubleArrayOf(1.0,0.0,0.0)
         greenColor.tint = doubleArrayOf(0.0,1.0,0.0)
-        greenColor.saturation = 0.5;
+        greenColor.saturation = 0.5
         blueColor.tint = doubleArrayOf(0.0,0.0,1.0)
-        blueColor.opacity = 0.66;
+        blueColor.opacity = 0.66
         yellowColor.tint = doubleArrayOf(1.0,1.0,0.0)
 
         binding.redbutton.setOnClickListener {
@@ -262,8 +269,13 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      */
     override fun onObjectSelected(objectId: String) {
         println("you picked " + humanbody!!.scene.objects[objectId]!!)
-        if (binding.paintmenu.visibility == View.INVISIBLE) {
-            return;
+        if (dissectmode) {
+            humanbody!!.scene.hide(arrayListOf<String>(objectId))
+            hiddenObjects.add(0, objectId)
+            return
+        }
+        if (!paintmode) {
+            return
         }
         if (paintColor != null) {
             humanbody!!.scene.color(objectId, paintColor)
