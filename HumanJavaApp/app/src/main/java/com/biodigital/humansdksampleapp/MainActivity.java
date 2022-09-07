@@ -1,7 +1,6 @@
 package com.biodigital.humansdksampleapp;
 
 import android.animation.LayoutTransition;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -21,10 +21,14 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.biodigital.humansdk.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 import java.util.ArrayList;
@@ -45,8 +49,10 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
     boolean expanded = false;
     HKColor paintColor = null;
 
+    // set this to false to hide the built in UI and show native UI elements
+    boolean uiAll = true;
+
     private ArrayList<HKModel> models = new ArrayList<>(Arrays.asList(
-            new HKModel("Title", "client/abbott/triclip_1", "", ""),
             new HKModel("Thorax", "production/maleAdult/human_02_regional_male_thorax.json", "", "human_02_regional_male_thorax"),
             new HKModel("Flu", "production/maleAdult/flu.json", "", "https://human.biodigital.com/thumbs/modules/production/maleAdult/flu/large/index.jpg"),
             new HKModel("Acne", "production/maleAdult/acne", "", "https://human.biodigital.com/thumbs/modules/production/maleAdult/acne/large/index.jpg"),
@@ -79,29 +85,24 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 HKModel model = models.get(position);
                 humanLayout.setVisibility(View.VISIBLE);
+                human.ui.presetBackgroundColor(Color.RED, Color.YELLOW);
                 human.load(model.id);
-                if ( HKServices.getInstance().modelDownloaded(model.id)) {
-                    System.out.println("already downloaded");
+                if (uiAll) {
+                    View home = humanLayout.findViewById(R.id.homebutton);
+                    ViewGroup homeparent = (ViewGroup)home.getParent();
+                    homeparent.removeView(home);
+                    humanLayout.addView(home);
                 } else {
-                    System.out.println("not downloaded");
+                    View menu = humanLayout.findViewById(R.id.menu);
+                    menu.setVisibility(View.VISIBLE);
+                    menu.bringToFront();
+                    View chap = humanLayout.findViewById(R.id.category);
+                    chap.bringToFront();
                 }
-                #if DEBUG
-                View menu = humanLayout.findViewById(R.id.menu);
-                menu.setVisibility(View.VISIBLE);
-                menu.bringToFront();
-                View chap = humanLayout.findViewById(R.id.category);
-                chap.bringToFront();
-                #else
-                View home = humanLayout.findViewById(R.id.homebutton);
-                ViewGroup homeparent = (ViewGroup)home.getParent();
-                homeparent.removeView(home);
-                humanLayout.addView(home);
-                #endif
             }
         });
         modelAdapter = new ModelAdapter(this,models);
         gridView.setAdapter(modelAdapter);
-
 
         LayoutInflater inflater = (LayoutInflater)getApplicationContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -127,14 +128,11 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
 
         humanLayout.setVisibility(View.INVISIBLE);
         RelativeLayout rl = humanLayout.findViewById(R.id.humanbody);
-        #if DEBUG
         HashMap<HumanUIOptions,Boolean> uimap = new HashMap<>();
-        uimap.put(HumanUIOptions.all,false);
+        uimap.put(HumanUIOptions.all,uiAll);
         human = new HKHuman(rl, uimap);
-        #else
-        human = new HKHuman(rl);
-        #endif
         human.setInterface(this);
+
         final Button resetbutton = (Button)humanLayout.findViewById(R.id.resetbutton);
         final Button dissectbutton = (Button)humanLayout.findViewById(R.id.dissectbutton);
         final Button undobutton = (Button)humanLayout.findViewById(R.id.undobutton);
@@ -147,9 +145,7 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         final Button bluebutton = (Button)humanLayout.findViewById(R.id.bluebutton);
         final Button yellowbutton = (Button)humanLayout.findViewById(R.id.yellowbutton);
         final Button undopaintbutton = (Button)humanLayout.findViewById(R.id.undopaintbutton);
-        final View allpaintstuff = (View)humanLayout.findViewById(R.id.allpaintstuff);
         final View paintmenu = (View)humanLayout.findViewById(R.id.paintmenu);
-        final ScrollView scroller = (ScrollView)humanLayout.findViewById(R.id.scrollView);
         chapterPager = (ViewPager)humanLayout.findViewById(R.id.humanChapterPager);
 
         final HKColor redColor = new HKColor();
@@ -207,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                 if ( dissectmode ) {
                     human.scene.dissect(true);
                 }
-
             }
         });
 
@@ -277,10 +272,8 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         });
 
         chapterPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
@@ -298,7 +291,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
             }
         });
     }
@@ -308,32 +300,28 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         RelativeLayout rl = (RelativeLayout) findViewById(R.id.category);
         ((ViewGroup) rl).getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
         if (expanded) {
-            System.out.println("shrink");
             int px = (int) (50 * scale + 0.5f);
             rl.getLayoutParams().height = px;
         } else {
-            System.out.println("expand");
             int px = (int) (160 * scale + 0.5f);
             rl.getLayoutParams().height = px;
         }
         rl.requestLayout();
         expanded = !expanded;
     }
+
     void doPaintButton() {
         Button paintbutton = (Button)findViewById(R.id.paintbutton);
         View paintmenu = (View)findViewById(R.id.paintmenu);
         paintmode = !paintmode;
-        if (paintmenu.getVisibility() == View.VISIBLE) {
-            paintmenu.setVisibility(View.INVISIBLE);
-            human.scene.enableHighlight();
-        } else {
-            paintmenu.setVisibility(View.VISIBLE);
-            human.scene.disableHighlight();
-        }
         if (paintmode) {
             paintbutton.getBackground().setColorFilter(new LightingColorFilter(0xFFFFFFFF, 0xFFAA0000));
+            paintmenu.setVisibility(View.VISIBLE);
+            human.scene.disableHighlight();
         } else {
             paintbutton.getBackground().setColorFilter(null);
+            paintmenu.setVisibility(View.INVISIBLE);
+            human.scene.enableHighlight();
         }
     }
 
@@ -359,22 +347,24 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                 if ( HKServices.getInstance().models != null &&  HKServices.getInstance().models.size() > 0) {
                     models.addAll( HKServices.getInstance().models);
                     modelAdapter.notifyDataSetChanged();
-    
-                    #if DEBUG
-//                    int i = 0;
-//                    int j = 0;
-//                    while (i < 2) {
-//                        HKModel model = models.get(j);
-//                        if (!HKServices.getInstance().modelDownloaded(model.id)) {
-//                            System.out.println("let's download " + model.id);
-//                            dlIds.add(model.id);
-//                            i++;
-//                            downloadCount++;
-//                        }
-//                        j++;
-//                    }
-//                    HKServices.getInstance().download(dlIds);
-                    #endif
+
+                    // set to a positive number to test out the download feature
+                    int testDownloads = 0;
+                    if (testDownloads > 0) {
+                        int i = 0;
+                        int j = 0;
+                        while (i < testDownloads) {
+                            HKModel model = models.get(j);
+                            if (!HKServices.getInstance().modelDownloaded(model.id)) {
+                                System.out.println("let's download " + model.id);
+                                dlIds.add(model.id);
+                                i++;
+                                downloadCount++;
+                            }
+                            j++;
+                        }
+                        HKServices.getInstance().download(dlIds);
+                    }
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -400,7 +390,6 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         System.out.println("error!  we aren't authenticated with BioDigital!");
     }
 
-
     /**
      * API Callback - SDK passed validation
      */
@@ -408,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         System.out.println("success!  we are authenticated with BioDigital!");
     }
 
-    public void onModelDownloaded(String modelId) {
+    public void onModelDownloaded(String modelId, Integer count, Integer total) {
         final HKHumanInterface activity = this;
         System.out.println("SUCCESS!!  model downloaded! " + modelId);
         downloadCount--;
@@ -425,52 +414,16 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (stressTestEnabled) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    nextStressTest();
-                }
-            }, 5000);
-        }
+    public void onModelDownloadError(String modelId) {
+        System.out.println("model download error! " + modelId);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    public void startStressTest(View view) {
-        stressTestEnabled = true;
-        nextStressTest();
-    }
-
-    public void stopStressTest(View view) {
-        stressTestEnabled = false;
-    }
-
-    private void nextStressTest() {
-        HKModel model = models.get(MainActivity.stressIncrement % 8); // models.size());
-        humanLayout.setVisibility(View.VISIBLE);
-        human.load(model.id);
-        MainActivity.stressIncrement += 1;
-    }
-
-    @Override
     public void onModelLoaded(String modelId) {
         System.out.println("sample app got model loaded message");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                System.out.println("%%% MODEL LOADED");
-                human.ui.setBackgroundColor(Color.RED, Color.YELLOW);
-//                ProgressBar progress = findViewById(R.id.progressBar1);
-//                progress.setVisibility(View.GONE);
+                System.out.println("model loaded " + modelId);
                 // build Chapter pager
                 HKChapter[] chaptersarray = new HKChapter[human.timeline.chapterList.size()];
                 int i = 0;
@@ -508,7 +461,7 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                         }
                     });
                 }
-            }, 10000);
+            }, 100);
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -519,13 +472,13 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
                         }
                     });
                 }
-            }, 15000);
+            }, 1500);
         }
     }
 
-    @Override
     public void onModelLoadError(String modelId) {
-
+        System.out.println("model load error " + modelId);
+        onBackPressed();
     }
 
     public void onSceneInit(String title) {
@@ -549,83 +502,97 @@ public class MainActivity extends AppCompatActivity implements HKServicesInterfa
         }
     }
 
-    @Override
-    public void onObjectDeselected(String objectId) {
-
-    }
-
-    @Override
-    public void onObjectsShown(Map<String, Object> objects) {
-
-    }
-
-    @Override
-    public void onChapterTransition(String chapterId) {
-
-    }
-
-    @Override
-    public void onAnimationComplete() {
-
-    }
-
-    @Override
     public void onScreenshot(Bitmap image) {
+        Uri bitmapUri = saveToInternalStorage(image);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/png");
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_STREAM, bitmapUri);
+        MainActivity.this.startActivity(intent);
+    }
 
+    private Uri saveToInternalStorage(Bitmap bitmapImage){
+        File mypath = new File(getApplicationContext().getCacheDir(),"shareImage.png");
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".provider", mypath);
+    }
+
+    public void onObjectDeselected(String objectId) {}
+
+    public void onObjectsShown(Map<String, Object> objects) {}
+
+    public void onChapterTransition(String chapterId) {}
+
+    public void onAnimationComplete() {}
+
+    public void onXrayEnabled(Boolean isEnabled) {}
+
+    public void onSceneRestore() {}
+
+    public void onTimelineUpdated(HKTimeline timeline) {}
+
+    public void onAnnotationCreated(String annotationId) {}
+
+    public void onAnnotationDestroyed(String annotationId) {}
+
+    public void onCameraUpdated(HKCamera camera) {}
+
+    public void onObjectPicked(String objectId, double[] position) {}
+
+    public void onAnnotationsShown(Boolean isShown) {}
+
+    public void onAnnotationUpdated(HKAnnotation annotation) {}
+
+    public void onObjectColor(String objectId, HKColor color) {}
+
+    public void onSceneCapture(String captureString) {}
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (stressTestEnabled) {
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    nextStressTest();
+                }
+            }, 5000);
+        }
     }
 
     @Override
-    public void onXrayEnabled(Boolean isEnabled) {
-
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
-    @Override
-    public void onSceneRestore() {
-
+    public void startStressTest(View view) {
+        stressTestEnabled = true;
+        nextStressTest();
     }
 
-    @Override
-    public void onTimelineUpdated(HKTimeline timeline) {
-
+    public void stopStressTest(View view) {
+        stressTestEnabled = false;
     }
 
-    @Override
-    public void onAnnotationCreated(String annotationId) {
-
-    }
-
-    @Override
-    public void onAnnotationDestroyed(String annotationId) {
-
-    }
-
-    @Override
-    public void onCameraUpdated(HKCamera camera) {
-
-    }
-
-    @Override
-    public void onObjectPicked(String objectId, double[] position) {
-
-    }
-
-    @Override
-    public void onAnnotationsShown(Boolean isShown) {
-
-    }
-
-    @Override
-    public void onAnnotationUpdated(HKAnnotation annotation) {
-
-    }
-
-    @Override
-    public void onObjectColor(String objectId, HKColor color) {
-
-    }
-
-    @Override
-    public void onSceneCapture(String captureString) {
-
+    private void nextStressTest() {
+        HKModel model = models.get(MainActivity.stressIncrement % 8); // models.size());
+        humanLayout.setVisibility(View.VISIBLE);
+        human.load(model.id);
+        MainActivity.stressIncrement += 1;
     }
 }

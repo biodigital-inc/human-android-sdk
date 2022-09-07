@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.biodigital.humansdk.HKModel
+import com.biodigital.humansdk.HKServices
 import com.squareup.picasso.Picasso
 
 class ModelAdapter(val mContext : Context, var models:ArrayList<HKModel>) : ArrayAdapter<HKModel>(mContext,R.layout.model_layout,models) {
@@ -41,6 +42,10 @@ class ModelAdapter(val mContext : Context, var models:ArrayList<HKModel>) : Arra
                 retView.setBackgroundColor(Color.LTGRAY)
             }
         }
+        if (HKServices.getInstance().modelDownloaded(model.id)) {
+            retView.setBackgroundColor(Color.GREEN)
+        }
+
         return retView
     }
 }

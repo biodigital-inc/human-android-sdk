@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.biodigital.humansdk.HKModel;
+import com.biodigital.humansdk.HKServices;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -68,6 +69,9 @@ public class ModelAdapter extends ArrayAdapter<HKModel> {
                 thumbView.setImageResource( resourceId );
                 convertView.setBackgroundColor(Color.LTGRAY);
             }
+        }
+        if (HKServices.getInstance().modelDownloaded(m.id)) {
+            convertView.setBackgroundColor(Color.GREEN);
         }
         return convertView;
     }

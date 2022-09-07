@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.biodigital.humansdk.*
-import kotlinx.android.synthetic.main.activity_human.*
+import com.biodigital.kotlinapp.databinding.ActivityHumanBinding
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.MutableMap
@@ -34,87 +34,90 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
     internal var blueColor = HKColor()
     internal var yellowColor = HKColor()
 
-    //    internal var chapterPager : ViewPager? = null
     internal var expanded = false
-
+    private lateinit var binding: ActivityHumanBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_human)
+        binding = ActivityHumanBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true);
 
+        val uiAll = false
+
         val modelId = intent.getStringExtra(MODEL_MESSAGE)
-        System.out.println("load model " + modelId)
+        System.out.println("load model $modelId")
 
         val uimap = HashMap<HumanUIOptions, Boolean>()
-        uimap[HumanUIOptions.all] = true
+        uimap[HumanUIOptions.all] = uiAll
 
-        humanbody = HKHuman(humanview, uimap)
+        humanbody = HKHuman(binding.humanview, uimap)
 
         humanbody!!.setInterface(this)
 
-        //        body.load("/production/maleAdult/flu.json");
         humanbody!!.load(modelId)
 
-        homebutton.visibility = View.INVISIBLE
-        resetbutton.visibility = View.INVISIBLE
-        dissectbutton.visibility = View.INVISIBLE
-        undobutton.visibility = View.INVISIBLE
-        xraybutton.visibility = View.INVISIBLE
-        isolatebutton.visibility = View.INVISIBLE
-        sharebutton.visibility = View.INVISIBLE
-        allpaintstuff.visibility = View.INVISIBLE
-        paintmenu.visibility = View.INVISIBLE
-        humanChapterPager.visibility = View.INVISIBLE
+        // turn the built in UI on, or off to show native UI elements
+        val uiVisibility = if (uiAll) View.INVISIBLE else View.VISIBLE
+        binding.homebutton.visibility = uiVisibility
+        binding.resetbutton.visibility = uiVisibility
+        binding.dissectbutton.visibility = uiVisibility
+        binding.undobutton.visibility = View.INVISIBLE
+        binding.xraybutton.visibility = uiVisibility
+        binding.isolatebutton.visibility = uiVisibility
+        binding.sharebutton.visibility = uiVisibility
+        binding.allpaintstuff.visibility = uiVisibility
+        binding.paintmenu.visibility = View.INVISIBLE
+        binding.humanChapterPager.visibility = uiVisibility
 
-        homebutton.setOnClickListener { finish() }
+        binding.homebutton.setOnClickListener { finish() }
 
-        resetbutton.setOnClickListener {
+        binding.resetbutton.setOnClickListener {
             humanbody!!.scene.reset()
             humanbody!!.camera.reset()
             xraymode = false
             isolatemode = false
             dissectmode = false
-            xraybutton.background.colorFilter = null
-            dissectbutton.background.colorFilter = null
-            isolatebutton.background.colorFilter = null
-            undobutton.visibility = View.INVISIBLE
+            binding.xraybutton.background.colorFilter = null
+            binding.dissectbutton.background.colorFilter = null
+            binding.isolatebutton.background.colorFilter = null
+            binding.undobutton.visibility = View.INVISIBLE
         }
 
-        dissectbutton.setOnClickListener {
+        binding.dissectbutton.setOnClickListener {
             if (paintmode) {
-                paintbutton.callOnClick();
+                binding.paintbutton.callOnClick();
             }
             dissectmode = !dissectmode
             humanbody!!.scene.dissect(dissectmode)
-            dissectbutton.isSelected = dissectmode
+            binding.dissectbutton.isSelected = dissectmode
             if (dissectmode) {
-                dissectbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
-                undobutton.visibility = View.VISIBLE
+                binding.dissectbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
+                binding.undobutton.visibility = View.VISIBLE
             } else {
-                dissectbutton.background.colorFilter = null
-                undobutton.visibility = View.INVISIBLE
+                binding.dissectbutton.background.colorFilter = null
+                binding.undobutton.visibility = View.INVISIBLE
             }
         }
 
-        undobutton.setOnClickListener { humanbody!!.scene.undo() }
+        binding.undobutton.setOnClickListener { humanbody!!.scene.undo() }
 
-        xraybutton.setOnClickListener {
+        binding.xraybutton.setOnClickListener {
             xraymode = !xraymode
             humanbody!!.scene.xray(xraymode)
             if (xraymode) {
-                xraybutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
+                binding.xraybutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
             } else {
-                xraybutton.background.colorFilter = null
+                binding.xraybutton.background.colorFilter = null
             }
             if (dissectmode) {
                 humanbody!!.scene.dissect(true)
             }
         }
 
-        isolatebutton.setOnClickListener {
+        binding.isolatebutton.setOnClickListener {
             isolatemode = !isolatemode
             humanbody!!.scene.isolate(isolatemode)
             //                if (isolatemode) {
@@ -127,24 +130,21 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             }
         }
 
-        sharebutton.setOnClickListener { humanbody!!.scene.share() }
+        binding.sharebutton.setOnClickListener { humanbody!!.scene.share() }
 
-        paintbutton.setOnClickListener {
+        binding.paintbutton.setOnClickListener {
             if (dissectmode) {
-                dissectbutton.callOnClick();
+                binding.dissectbutton.callOnClick();
             }
             paintmode = !paintmode
-            if (paintmenu.visibility == View.VISIBLE) {
-                paintmenu.visibility = View.INVISIBLE
-                humanbody!!.scene.enableHighlight()
-            } else {
-                paintmenu.visibility = View.VISIBLE
-                humanbody!!.scene.disableHighlight()
-            }
             if (paintmode) {
-                paintbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
+                binding.paintmenu.visibility = View.VISIBLE
+                humanbody!!.scene.disableHighlight()
+                binding.paintbutton.background.colorFilter = LightingColorFilter(-0x1, -0x560000)
             } else {
-                paintbutton.background.colorFilter = null
+                binding.paintmenu.visibility = View.INVISIBLE
+                humanbody!!.scene.enableHighlight()
+                binding.paintbutton.background.colorFilter = null
             }
         }
 
@@ -155,32 +155,32 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
         blueColor.opacity = 0.66;
         yellowColor.tint = doubleArrayOf(1.0,1.0,0.0)
 
-        redbutton.setOnClickListener {
+        binding.redbutton.setOnClickListener {
             paintColor = redColor
-            paintmenu.setBackgroundColor(Color.RED)
+            binding.paintmenu.setBackgroundColor(Color.RED)
         }
 
-        greenbutton.setOnClickListener {
+        binding.greenbutton.setOnClickListener {
             paintColor = greenColor
-            paintmenu.setBackgroundColor(Color.GREEN)
+            binding.paintmenu.setBackgroundColor(Color.GREEN)
         }
 
-        bluebutton.setOnClickListener {
+        binding.bluebutton.setOnClickListener {
             paintColor = blueColor
-            paintmenu.setBackgroundColor(Color.BLUE)
+            binding.paintmenu.setBackgroundColor(Color.BLUE)
         }
 
-        yellowbutton.setOnClickListener {
+        binding.yellowbutton.setOnClickListener {
             paintColor = yellowColor
-            paintmenu.setBackgroundColor(Color.YELLOW)
+            binding.paintmenu.setBackgroundColor(Color.YELLOW)
         }
 
-        undopaintbutton.setOnClickListener {
+        binding.undopaintbutton.setOnClickListener {
             paintColor = null
-            paintmenu.setBackgroundColor(Color.TRANSPARENT)
+            binding.paintmenu.setBackgroundColor(Color.TRANSPARENT)
         }
 
-        humanChapterPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+        binding.humanChapterPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
 
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
 
@@ -212,17 +212,15 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
 
     fun handleChapterClick() {
         val scale = applicationContext.resources.displayMetrics.density
-        (category as ViewGroup).layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        (binding.category as ViewGroup).layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
         if (expanded) {
-            println("shrink")
             val px = (50 * scale + 0.5f).toInt()
-            category.layoutParams.height = px
+            binding.category.layoutParams.height = px
         } else {
-            println("expand")
             val px = (160 * scale + 0.5f).toInt()
-            category.layoutParams.height = px
+            binding.category.layoutParams.height = px
         }
-        category.requestLayout()
+        binding.category.requestLayout()
         expanded = !expanded
     }
 
@@ -237,7 +235,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      * API Callback - model load complete
      */
     override fun onModelLoaded(title: String) {
-        println("MODEL LOADED CALLBACK " + title)
+        println("MODEL LOADED CALLBACK $title")
         runOnUiThread {
             // build Chapter pager
             val chaptersarray = ArrayList<HKChapter>(humanbody!!.timeline.chapterList.size)
@@ -249,7 +247,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
             }
             val adapter = ChapterAdapter(supportFragmentManager)
             adapter.setChapters(chaptersarray.toTypedArray())
-            humanChapterPager.adapter = adapter
+            binding.humanChapterPager.adapter = adapter
         }
     }
 
@@ -264,7 +262,7 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      */
     override fun onObjectSelected(objectId: String) {
         println("you picked " + humanbody!!.scene.objects[objectId]!!)
-        if (paintmenu.visibility == View.INVISIBLE) {
+        if (binding.paintmenu.visibility == View.INVISIBLE) {
             return;
         }
         if (paintColor != null) {
@@ -283,9 +281,11 @@ class HumanActivity : AppCompatActivity(), HKHumanInterface {
      * @param chapterID String ID of the Chapter, used to look up the Chapter object in
      * HumanBody's public HashMap<String></String>,Chapter> chapters
      */
-    override fun onChapterTransition(objectId: String) {
-        val chap = humanbody!!.timeline.chapters[objectId]
-        println("got chapter " + chap!!.title)
+    override fun onChapterTransition(chapterID: String) {
+        val chap = humanbody!!.timeline.chapters[chapterID]
+        if (chap != null) {
+            println("got chapter ${chap.title}")
+        }
     }
 
     /**
