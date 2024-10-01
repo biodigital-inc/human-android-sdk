@@ -45,7 +45,6 @@ class ModelAdapter(val mContext : Context, var models:ArrayList<HKModel>) : Arra
         if (HKServices.getInstance().modelDownloaded(model.id)) {
             retView.setBackgroundColor(Color.GREEN)
         }
-
         return retView
     }
 }
