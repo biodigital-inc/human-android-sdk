@@ -1,21 +1,18 @@
-package com.biodigital.humansdksampleapp;
+package com.biodigital.humanjavaapp;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
-import com.biodigital.humansdk.HKChapter;
 import com.biodigital.humansdk.HKChapter;
 
 public class ChapterAdapter extends FragmentStatePagerAdapter {
@@ -36,8 +33,12 @@ public class ChapterAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int i) {
         ChapterFragment fragment = new ChapterFragment();
         Bundle args = new Bundle();
-        args.putString(ChapterFragment.ARG_TITLE, chapters[i].title);
-        args.putString(ChapterFragment.ARG_DESC, chapters[i].description);
+        if (chapters[i] != null && chapters[i].title != null) {
+            args.putString(ChapterFragment.ARG_TITLE, chapters[i].title);
+        }
+        if (chapters[i] != null && chapters[i].description != null) {
+            args.putString(ChapterFragment.ARG_DESC, chapters[i].description);
+        }
         fragment.setArguments(args);
         return fragment;
     }
@@ -79,9 +80,13 @@ public class ChapterAdapter extends FragmentStatePagerAdapter {
             rootView.getBackground().setAlpha(70);
 
             TextView chapterTitleText = (TextView)rootView.findViewById(R.id.chapterTitle);
-            chapterTitleText.setText(title);
+            if (title != null) {
+                chapterTitleText.setText(title);
+            }
             TextView chapterDescText = (TextView)rootView.findViewById(R.id.chapterDescription);
-            chapterDescText.setText(Html.fromHtml(description));
+            if (description != null) {
+                chapterDescText.setText(Html.fromHtml(description));
+            }
             chapterTitleText.setMovementMethod(new ScrollingMovementMethod());
             chapterDescText.setMovementMethod(new ScrollingMovementMethod());
 

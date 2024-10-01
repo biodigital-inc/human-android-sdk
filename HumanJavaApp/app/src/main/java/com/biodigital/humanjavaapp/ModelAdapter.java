@@ -1,4 +1,4 @@
-package com.biodigital.humansdksampleapp;
+package com.biodigital.humanjavaapp;
 
 import android.content.Context;
 import android.content.res.Resources;
