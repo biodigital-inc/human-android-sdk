@@ -1,7 +1,8 @@
 # human-android-sdk
+
 The Biodigital Human Android SDK
 
-The current version is 139.1, released December 18, 2024
+The current version is 164.7, released April 22, 2026
 
 Please visit http://developer.biodigital.com for documentation and setup instructions, and http://human.biodigital.com to see the 3D Human
 
@@ -11,7 +12,7 @@ xsNOTE: You'll need to generate an API key in our developer site and put your cr
 
 <hr>
 
-To install human-android-sdk into your own app, add our maven repository to your top level build.gradle file.  You should define BD_PASSWORD in your local.properties file:
+To install human-android-sdk into your own app, add our maven repository to your top level build.gradle file. You should define BD_PASSWORD in your local.properties file:
 
 ```
 BD_PASSWORD=<-- insert the github access key here -->
