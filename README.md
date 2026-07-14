@@ -2,7 +2,7 @@
 
 The Biodigital Human Android SDK
 
-The current version is 165.1, released May 7, 2026
+The current version is 165.5, released July 14, 2026
 
 Please visit http://developer.biodigital.com for documentation and setup instructions, and http://human.biodigital.com to see the 3D Human
 
